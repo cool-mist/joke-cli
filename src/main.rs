@@ -6,12 +6,10 @@ use jokes::{Joke, JokeType, Jokes};
 fn main() -> Result<()> {
     let args = Args::parse();
     let command = Command::parse(args);
-    let all_jokes = Jokes::load_all_jokes();
 
     match command {
         Command::UpdateCommand => {
-            let jokes = reqwest::blocking::get("https://raw.githubusercontent.com/15Dkatz/official_joke_api/master/jokes/index.json")?.text()?;
-            std::fs::write("index.json", jokes)?;
+            Jokes::download_all_jokes();
         }
         Command::ListQuery => {
             println!("{}", JokeType::Dad);
@@ -20,12 +18,14 @@ fn main() -> Result<()> {
             println!("{}", JokeType::Programming);
         }
         Command::IdQuery(id) => {
+            let all_jokes = Jokes::load_all_jokes();
             let joke = all_jokes.jokes.get(id as usize);
             if let Some(joke) = joke {
                 joke.print_joke();
             }
         }
         Command::CategoryQuery(category, number) => {
+            let all_jokes = Jokes::load_all_jokes();
             let jokes_count = number.unwrap_or(1);
             let category_jokes: Vec<&Joke> = all_jokes
                 .jokes
@@ -36,6 +36,7 @@ fn main() -> Result<()> {
             random_jokes.iter().for_each(|joke| joke.print_joke());
         }
         Command::RandomQuery(number) => {
+            let all_jokes = Jokes::load_all_jokes();
             let jokes_count = number.unwrap_or(1);
             let random_jokes = take_random_jokes(all_jokes.jokes.iter().collect(), jokes_count);
             random_jokes.iter().for_each(|joke| joke.print_joke());
