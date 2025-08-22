@@ -1,4 +1,4 @@
-use clap::ValueEnum;
+use argh::FromArgValue;
 use serde::Deserialize;
 use std::fs::File;
 
@@ -48,7 +48,11 @@ impl Jokes {
 
 fn get_jokes_cache_file() -> String {
     let home_dir = home::home_dir().unwrap();
-    home_dir.join(".cache/jokes.json").to_str().unwrap().to_string()
+    home_dir
+        .join(".cache/jokes.json")
+        .to_str()
+        .unwrap()
+        .to_string()
 }
 
 #[derive(Deserialize)]
@@ -68,7 +72,7 @@ impl Joke {
     }
 }
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Deserialize, ValueEnum)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Deserialize)]
 pub enum JokeType {
     #[serde(rename = "dad")]
     Dad,
@@ -80,13 +84,28 @@ pub enum JokeType {
     Programming,
 }
 
+impl FromArgValue for JokeType {
+    fn from_arg_value(value: &str) -> Result<Self, String> {
+        match value.to_lowercase().as_str() {
+            "dad" => Ok(JokeType::Dad),
+            "general" => Ok(JokeType::General),
+            "knock-knock" => Ok(JokeType::KnockKnock),
+            "programming" => Ok(JokeType::Programming),
+            _ => Err(format!(
+                "Invalid joke type: {}, available: dad, general, knock-knock, programming",
+                value
+            )),
+        }
+    }
+}
+
 impl std::fmt::Display for JokeType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            JokeType::Dad => write!(f, "Dad"),
-            JokeType::General => write!(f, "General"),
-            JokeType::KnockKnock => write!(f, "Knock-Knock"),
-            JokeType::Programming => write!(f, "Programming"),
+            JokeType::Dad => write!(f, "dad"),
+            JokeType::General => write!(f, "general"),
+            JokeType::KnockKnock => write!(f, "knock-knock"),
+            JokeType::Programming => write!(f, "programming"),
         }
     }
 }

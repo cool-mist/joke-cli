@@ -1,10 +1,11 @@
 mod jokes;
-use anyhow::Result;
-use clap::Parser;
+use std::error::Error;
+
+use argh::FromArgs;
 use jokes::{Joke, JokeType, Jokes};
 
-fn main() -> Result<()> {
-    let args = Args::parse();
+fn main() -> Result<(), Box<dyn Error>> {
+    let args = argh::from_env::<Args>();
     let command = Command::parse(args);
 
     match command {
@@ -70,26 +71,27 @@ fn take_random_jokes(jokes: Vec<&Joke>, jokes_count: u32) -> Vec<&Joke> {
         .collect()
 }
 
-#[derive(Parser, Debug)]
+/// Unofficial CLI to for the official JokeAPI (https://github.com/15Dkatz/official_joke_api)
+#[derive(Debug, FromArgs)]
 struct Args {
-    /// Download the latest jokes
-    #[arg(long)]
+    /// download the latest jokes
+    #[argh(switch)]
     update: bool,
 
-    /// List all joke categories
-    #[arg(long, short)]
+    /// list all joke categories
+    #[argh(switch, short = 'l')]
     list: bool,
 
-    /// List joke from this category
-    #[arg(value_enum, long, short)]
+    /// list joke from this category
+    #[argh(option, short = 'c')]
     category: Option<JokeType>,
 
-    /// List these many jokes
-    #[clap(long, short)]
+    /// list these many jokes
+    #[argh(option, short = 'n')]
     number: Option<u32>,
 
-    /// Grab this joke by ID
-    #[clap(long, short)]
+    /// grab this joke by ID
+    #[argh(option, short = 'i')]
     id: Option<u32>,
 }
 
